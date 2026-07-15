@@ -1,0 +1,82 @@
+.bp-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.bp-row::-webkit-scrollbar {
+  display: none;
+}
+
+.bp-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--border-subtle);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.bp-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--bp-color) 8%, transparent), transparent);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.bp-card:hover {
+  border-color: color-mix(in srgb, var(--bp-color) 20%, transparent);
+  color: var(--text-primary);
+}
+
+.bp-card:hover::before {
+  opacity: 1;
+}
+
+.bp-card.bp-active {
+  border-color: color-mix(in srgb, var(--bp-color) 35%, transparent);
+  color: var(--text-primary);
+  box-shadow: 0 2px 16px color-mix(in srgb, var(--bp-color) 12%, transparent);
+}
+
+.bp-card.bp-active::before {
+  opacity: 1;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--bp-color) 12%, transparent), color-mix(in srgb, var(--bp-color) 4%, transparent));
+}
+
+.bp-card-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.bp-card-label {
+  letter-spacing: 0.2px;
+  position: relative;
+  z-index: 1;
+}
+
+.bp-active-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--bp-color);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 6px var(--bp-color);
+}
