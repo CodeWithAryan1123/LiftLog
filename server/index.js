@@ -73,6 +73,9 @@ process.on('SIGTERM', () => shutdown('🛑 Received SIGTERM, shutting down grace
 // Connect to MongoDB and start server
 async function start() {
   try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is missing.');
+    }
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
     server = app.listen(PORT, () => {
