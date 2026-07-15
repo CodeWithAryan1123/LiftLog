@@ -7,6 +7,7 @@ import workoutRoutes from './routes/workouts.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+let server;
 
 // Middleware
 const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:5173')
@@ -40,12 +41,41 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong on the server' });
 });
 
+function shutdown(reason, code = 0) {
+  console.warn(reason);
+
+  Promise.resolve()
+    .then(() => mongoose.connection.close())
+    .catch((err) => {
+      console.error('❌ Error while closing MongoDB connection:', err.message);
+    })
+    .finally(() => {
+      if (server) {
+        server.close(() => process.exit(code));
+        return;
+      }
+
+      process.exit(code);
+    });
+}
+
+mongoose.connection.on('error', (err) => {
+  console.error('⚠️ MongoDB connection error:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️ MongoDB disconnected');
+});
+
+process.on('SIGINT', () => shutdown('🛑 Received SIGINT, shutting down gracefully...'));
+process.on('SIGTERM', () => shutdown('🛑 Received SIGTERM, shutting down gracefully...'));
+
 // Connect to MongoDB and start server
 async function start() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
   } catch (err) {
