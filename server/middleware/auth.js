@@ -1,12 +1,32 @@
 import jwt from 'jsonwebtoken';
 
+function getCookieValue(cookieHeader, name) {
+  if (!cookieHeader) {
+    return null;
+  }
+
+  const cookie = cookieHeader
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`));
+
+  if (!cookie) {
+    return null;
+  }
+
+  return decodeURIComponent(cookie.slice(name.length + 1));
+}
+
 export default function auth(req, res, next) {
   const header = req.headers.authorization;
-  if (!header || !header.startsWith('Bearer ')) {
+  const token = header && header.startsWith('Bearer ')
+    ? header.split(' ')[1]
+    : getCookieValue(req.headers.cookie, 'liftlog-token');
+
+  if (!token) {
     return res.status(401).json({ error: 'No token provided' });
   }
 
-  const token = header.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.id;

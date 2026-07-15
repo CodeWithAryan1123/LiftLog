@@ -13,13 +13,29 @@ export default function Calendar({ selectedDate, onSelectDate, refreshKey }) {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [workoutDates, setWorkoutDates] = useState(new Set());
+  const [error, setError] = useState('');
 
   // Fetch workout dates from API when month or refreshKey changes
   useEffect(() => {
+    let active = true;
+    setError('');
     const monthStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`;
-    getWorkoutDates(monthStr).then((dates) => {
-      setWorkoutDates(new Set(dates));
-    });
+    getWorkoutDates(monthStr)
+      .then((dates) => {
+        if (active) {
+          setWorkoutDates(new Set(dates));
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) {
+          setWorkoutDates(new Set());
+          setError(err.message || 'Unable to load calendar data');
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, [viewYear, viewMonth, refreshKey]);
 
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
@@ -74,6 +90,11 @@ export default function Calendar({ selectedDate, onSelectDate, refreshKey }) {
         <h2 className="cal-title">{MONTHS[viewMonth]} {viewYear}</h2>
         <button className="cal-nav" onClick={nextMonth}>›</button>
       </div>
+      {error && (
+        <div className="cal-error" role="alert">
+          {error}
+        </div>
+      )}
       <div className="cal-weekdays">
         {DAYS.map((d) => (
           <div key={d} className="cal-weekday">{d}</div>

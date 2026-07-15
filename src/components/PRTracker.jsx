@@ -5,13 +5,33 @@ import './PRTracker.css';
 export default function PRTracker({ refreshKey }) {
   const [prs, setPrs] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    let active = true;
+    setError('');
     setLoading(true);
-    getAllPRs().then((data) => {
-      setPrs(data);
-      setLoading(false);
-    });
+    getAllPRs()
+      .then((data) => {
+        if (active) {
+          setPrs(data);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) {
+          setPrs({});
+          setError(err.message || 'Unable to load personal records');
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, [refreshKey]);
 
   const grouped = {};
@@ -24,8 +44,32 @@ export default function PRTracker({ refreshKey }) {
 
   if (loading) {
     return (
-      <div className="pr-container pr-empty-state">
-        <div className="app-loading-spinner small" />
+      <div className="pr-container">
+        <div className="pr-head pr-head-skeleton">
+          <div className="pr-head-title-skeleton shimmer" />
+          <div className="pr-head-count-skeleton shimmer" />
+        </div>
+        <div className="pr-body pr-body-skeleton">
+          <div className="pr-section-skeleton">
+            <div className="pr-section-title-skeleton shimmer" />
+            <div className="pr-row-skeleton shimmer" />
+            <div className="pr-row-skeleton shimmer" />
+          </div>
+          <div className="pr-section-skeleton">
+            <div className="pr-section-title-skeleton shimmer" />
+            <div className="pr-row-skeleton shimmer" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="pr-container pr-error-state" role="alert">
+        <div className="pr-error-icon">!</div>
+        <h3>Unable to load personal records</h3>
+        <p>{error}</p>
       </div>
     );
   }

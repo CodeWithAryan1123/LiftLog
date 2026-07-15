@@ -14,15 +14,30 @@ export default function WorkoutLogger({
   const [reps, setReps] = useState('');
   const [saving, setSaving] = useState(false);
   const [currentPR, setCurrentPR] = useState(null);
+  const [error, setError] = useState('');
 
   const exerciseEntry = dayWorkouts?.find((e) => e.exercise === exerciseName);
   const sets = exerciseEntry?.sets || [];
 
   // Fetch PRs
   useEffect(() => {
-    getAllPRs().then((prs) => {
-      setCurrentPR(prs[exerciseName] || null);
-    });
+    let active = true;
+    setError('');
+    getAllPRs()
+      .then((prs) => {
+        if (active) {
+          setCurrentPR(prs[exerciseName] || null);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (active) {
+          setError(err.message || 'Unable to load PR information');
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, [exerciseName, dayWorkouts]);
 
   async function handleAddSet(e) {
@@ -30,21 +45,36 @@ export default function WorkoutLogger({
     if (!weight || !reps || saving) return;
 
     setSaving(true);
-    const newSet = { weight: Number(weight), reps: Number(reps) };
-    const updated = await addSetToExercise(selectedDate, exerciseName, bodyPart, newSet);
-    const isNewPR = !currentPR || newSet.weight > currentPR.weight;
+    setError('');
 
-    setWeight('');
-    setReps('');
-    setSaving(false);
-    onUpdate(updated, isNewPR);
+    try {
+      const newSet = { weight: Number(weight), reps: Number(reps) };
+      const updated = await addSetToExercise(selectedDate, exerciseName, bodyPart, newSet);
+      const isNewPR = !currentPR || newSet.weight > currentPR.weight;
+
+      setWeight('');
+      setReps('');
+      onUpdate(updated, isNewPR);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Unable to save workout');
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleRemoveSet(index) {
     setSaving(true);
-    const updated = await removeSet(selectedDate, exerciseName, index);
-    setSaving(false);
-    onUpdate(updated, false);
+    setError('');
+    try {
+      const updated = await removeSet(selectedDate, exerciseName, index);
+      onUpdate(updated, false);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Unable to remove set');
+    } finally {
+      setSaving(false);
+    }
   }
 
   // Format date nicely
@@ -66,6 +96,12 @@ export default function WorkoutLogger({
         <div className="wl-body">
           <h3 className="wl-exercise-name">{exerciseName}</h3>
           <span className="wl-date">{dateLabel}</span>
+
+          {error && (
+            <div className="wl-error" role="alert">
+              {error}
+            </div>
+          )}
 
           {currentPR && (
             <div className="wl-pr-row">

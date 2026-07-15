@@ -31,6 +31,7 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState('workout');
   const [dayWorkouts, setDayWorkouts] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
+  const [dataError, setDataError] = useState('');
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
@@ -38,13 +39,26 @@ function AppContent() {
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
+    setDataError('');
     setDataLoading(true);
-    getWorkoutForDate(selectedDate).then((data) => {
-      if (!cancelled) {
-        setDayWorkouts(data);
-        setDataLoading(false);
-      }
-    });
+    getWorkoutForDate(selectedDate)
+      .then((data) => {
+        if (!cancelled) {
+          setDayWorkouts(data);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) {
+          setDayWorkouts([]);
+          setDataError(err.message || 'Unable to load workout data');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setDataLoading(false);
+        }
+      });
     return () => { cancelled = true; };
   }, [selectedDate, refreshKey, user]);
 
@@ -151,9 +165,16 @@ function AppContent() {
                   </div>
                 )}
               </div>
+              {dataError && (
+                <div className="day-card-error" role="alert">
+                  {dataError}
+                </div>
+              )}
               {dataLoading ? (
-                <div className="day-card-empty">
-                  <div className="app-loading-spinner small" />
+                <div className="day-card-skeleton-list">
+                  <div className="day-card-skeleton-item shimmer" />
+                  <div className="day-card-skeleton-item shimmer" />
+                  <div className="day-card-skeleton-item shimmer" />
                 </div>
               ) : dayWorkouts.length === 0 ? (
                 <div className="day-card-empty">
