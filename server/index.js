@@ -38,7 +38,7 @@ app.get('/api/health', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('💥 Unhandled error:', err.stack || err);
-  res.status(500).json({ error: 'Something went wrong on the server' });
+  res.status(500).json({ error: err.message, stack: err.stack });
 });
 
 function shutdown(reason, code = 0) {
