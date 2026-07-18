@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import mongoose from 'mongoose';
+import { initDb, closeDb } from './db.js';
 import authRoutes from './routes/auth.js';
 import workoutRoutes from './routes/workouts.js';
 
@@ -44,10 +44,9 @@ app.use((err, req, res, next) => {
 function shutdown(reason, code = 0) {
   console.warn(reason);
 
-  Promise.resolve()
-    .then(() => mongoose.connection.close())
+  closeDb()
     .catch((err) => {
-      console.error('❌ Error while closing MongoDB connection:', err.message);
+      console.error('❌ Error while closing PostgreSQL pool:', err.message);
     })
     .finally(() => {
       if (server) {
@@ -59,30 +58,23 @@ function shutdown(reason, code = 0) {
     });
 }
 
-mongoose.connection.on('error', (err) => {
-  console.error('⚠️ MongoDB connection error:', err.message);
-});
-
-mongoose.connection.on('disconnected', () => {
-  console.warn('⚠️ MongoDB disconnected');
-});
-
 process.on('SIGINT', () => shutdown('🛑 Received SIGINT, shutting down gracefully...'));
 process.on('SIGTERM', () => shutdown('🛑 Received SIGTERM, shutting down gracefully...'));
 
-// Connect to MongoDB and start server
+// Connect to PostgreSQL and start server
 async function start() {
   try {
-    if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI environment variable is missing.');
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL environment variable is missing.');
     }
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✅ Connected to MongoDB');
+    console.log('🔌 Connecting to PostgreSQL...');
+    await initDb();
+    console.log('✅ Connected to PostgreSQL — tables ready');
     server = app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error('❌ MongoDB connection failed:', err.message);
+    console.error('❌ PostgreSQL connection failed:', err.message);
     process.exit(1);
   }
 }

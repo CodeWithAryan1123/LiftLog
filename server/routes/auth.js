@@ -2,7 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
-import User from '../models/User.js';
+import { query } from '../db.js';
 import auth from '../middleware/auth.js';
 
 const router = Router();
@@ -25,7 +25,7 @@ const authLimiter = rateLimit({
 });
 
 function createToken(user) {
-  return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 }
 
 function setAuthCookie(res, token) {
@@ -52,20 +52,26 @@ router.post('/signup', authLimiter, async (req, res) => {
       });
     }
 
-    const existing = await User.findOne({ email });
-    if (existing) {
+    const existing = await query('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()]);
+    if (existing.rows.length > 0) {
       return res.status(400).json({ error: 'Email already registered' });
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed });
+    const result = await query(
+      'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email',
+      [name.trim(), email.toLowerCase().trim(), hashed]
+    );
+
+    const user = result.rows[0];
     const token = createToken(user);
     setAuthCookie(res, token);
 
     res.status(201).json({
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email },
     });
   } catch (err) {
+    console.error('Signup error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -79,11 +85,12 @@ router.post('/login', authLimiter, async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
+    const result = await query('SELECT id, name, email, password FROM users WHERE email = $1', [email.toLowerCase().trim()]);
+    if (result.rows.length === 0) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
+    const user = result.rows[0];
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(400).json({ error: 'Invalid credentials' });
@@ -92,9 +99,10 @@ router.post('/login', authLimiter, async (req, res) => {
     const token = createToken(user);
     setAuthCookie(res, token);
     res.json({
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { id: user.id, name: user.name, email: user.email },
     });
   } catch (err) {
+    console.error('Login error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -108,10 +116,12 @@ router.post('/logout', (_req, res) => {
 // GET /api/auth/me
 router.get('/me', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password');
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user._id, name: user.name, email: user.email });
+    const result = await query('SELECT id, name, email FROM users WHERE id = $1', [req.userId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    const user = result.rows[0];
+    res.json({ id: user.id, name: user.name, email: user.email });
   } catch (err) {
+    console.error('Me error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
