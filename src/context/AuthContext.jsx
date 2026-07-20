@@ -27,7 +27,15 @@ export function AuthProvider({ children }) {
           throw new Error('Invalid session');
         }
 
-        const data = await res.json();
+        // Parse JSON safely — some deployment responses may have empty bodies.
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          const text = await res.text().catch(() => null);
+          data = text ? { message: text } : {};
+        }
+
         if (!cancelled) {
           setUser(data);
         }
@@ -56,7 +64,14 @@ export function AuthProvider({ children }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      const text = await res.text().catch(() => null);
+      data = text ? { error: text } : {};
+    }
+
     if (!res.ok) throw new Error(data.error || 'Login failed');
     setUser(data.user);
     return data;
@@ -69,7 +84,14 @@ export function AuthProvider({ children }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
     });
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      const text = await res.text().catch(() => null);
+      data = text ? { error: text } : {};
+    }
+
     if (!res.ok) throw new Error(data.error || 'Signup failed');
     setUser(data.user);
     return data;

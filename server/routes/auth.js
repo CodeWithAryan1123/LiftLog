@@ -65,13 +65,15 @@ router.post('/signup', authLimiter, async (req, res) => {
 
     const user = result.rows[0];
     const token = createToken(user);
-    setAuthCookie(res, token);
+    try {
+      setAuthCookie(res, token);
+    } catch (cookieErr) {
+      console.error('Signup: failed to set cookie:', cookieErr && (cookieErr.stack || cookieErr.message || cookieErr));
+    }
 
-    res.status(201).json({
-      user: { id: user.id, name: user.name, email: user.email },
-    });
+    res.status(201).json({ user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
-    console.error('Signup error:', err.message);
+    console.error('Signup error:', err && (err.stack || err.message || err));
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -97,12 +99,15 @@ router.post('/login', authLimiter, async (req, res) => {
     }
 
     const token = createToken(user);
-    setAuthCookie(res, token);
-    res.json({
-      user: { id: user.id, name: user.name, email: user.email },
-    });
+    try {
+      setAuthCookie(res, token);
+    } catch (cookieErr) {
+      console.error('Login: failed to set cookie:', cookieErr && (cookieErr.stack || cookieErr.message || cookieErr));
+    }
+
+    res.json({ user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
-    console.error('Login error:', err.message);
+    console.error('Login error:', err && (err.stack || err.message || err));
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -121,7 +126,7 @@ router.get('/me', auth, async (req, res) => {
     const user = result.rows[0];
     res.json({ id: user.id, name: user.name, email: user.email });
   } catch (err) {
-    console.error('Me error:', err.message);
+    console.error('Me error:', err && (err.stack || err.message || err));
     res.status(500).json({ error: 'Server error' });
   }
 });

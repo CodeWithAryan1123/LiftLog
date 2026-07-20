@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import requestLogger from './middleware/logging.js';
 import { initDb, closeDb } from './db.js';
 import authRoutes from './routes/auth.js';
 import workoutRoutes from './routes/workouts.js';
@@ -25,6 +26,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+app.use(requestLogger);
 
 // Routes
 app.use('/api/auth', authRoutes);
