@@ -1,11 +1,15 @@
 import { API_BASE } from './api';
+import { getToken } from '../context/AuthContext';
 
 const WORKOUT_API = `${API_BASE}/api/workouts`;
 
 function headers() {
-  return {
-    'Content-Type': 'application/json',
-  };
+  const h = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) {
+    h['Authorization'] = `Bearer ${token}`;
+  }
+  return h;
 }
 
 async function fetchJson(url, options = {}) {
