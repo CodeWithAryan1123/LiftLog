@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import LoginPage from './components/LoginPage';
 import Calendar from './components/Calendar';
 import BodyPartSelector from './components/BodyPartSelector';
 import ExerciseList from './components/ExerciseList';
-import WorkoutLogger from './components/WorkoutLogger';
-import PRTracker from './components/PRTracker';
 import { getWorkoutForDate } from './utils/storage';
 import './App.css';
+
+// Lazy-load components that are not needed on initial paint
+const LoginPage = lazy(() => import('./components/LoginPage'));
+const WorkoutLogger = lazy(() => import('./components/WorkoutLogger'));
+const PRTracker = lazy(() => import('./components/PRTracker'));
 
 function getTodayStr() {
   const t = new Date();
@@ -72,7 +74,16 @@ function AppContent() {
   }
 
   if (!user) {
-    return <LoginPage />;
+    return (
+      <Suspense fallback={
+        <div className="app-loading">
+          <div className="app-loading-spinner" />
+          <p>Loading...</p>
+        </div>
+      }>
+        <LoginPage />
+      </Suspense>
+    );
   }
 
   function handleSelectExercise(exerciseName, bodyPart) {
@@ -108,7 +119,7 @@ function AppContent() {
           </div>
         </div>
         <div className="app-header-right">
-          <nav className="app-nav">
+          <nav className="app-nav" aria-label="Main navigation">
             <button
               className={`nav-btn ${activeTab === 'workout' ? 'nav-active' : ''}`}
               onClick={() => setActiveTab('workout')}
@@ -127,7 +138,7 @@ function AppContent() {
           <div className="app-user">
             <span className="app-username">{user.name}</span>
           </div>
-          <button className="logout-btn" onClick={logout} title="Log out">
+          <button className="logout-btn" onClick={logout} title="Log out" aria-label="Log out">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           </button>
         </div>
@@ -218,19 +229,27 @@ function AppContent() {
         </main>
       ) : (
         <main className="app-main app-main-single">
-          <PRTracker refreshKey={refreshKey} />
+          <Suspense fallback={
+            <div className="app-loading">
+              <div className="app-loading-spinner small" />
+            </div>
+          }>
+            <PRTracker refreshKey={refreshKey} />
+          </Suspense>
         </main>
       )}
 
       {loggerOpen && (
-        <WorkoutLogger
-          exerciseName={loggerOpen.exerciseName}
-          bodyPart={loggerOpen.bodyPart}
-          selectedDate={selectedDate}
-          dayWorkouts={dayWorkouts}
-          onClose={handleCloseLogger}
-          onUpdate={handleLoggerUpdate}
-        />
+        <Suspense fallback={null}>
+          <WorkoutLogger
+            exerciseName={loggerOpen.exerciseName}
+            bodyPart={loggerOpen.bodyPart}
+            selectedDate={selectedDate}
+            dayWorkouts={dayWorkouts}
+            onClose={handleCloseLogger}
+            onUpdate={handleLoggerUpdate}
+          />
+        </Suspense>
       )}
     </div>
   );

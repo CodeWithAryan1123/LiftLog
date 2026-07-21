@@ -86,9 +86,9 @@ export default function Calendar({ selectedDate, onSelectDate, refreshKey }) {
   return (
     <div className="calendar">
       <div className="cal-header">
-        <button className="cal-nav" onClick={prevMonth}>‹</button>
+        <button className="cal-nav" onClick={prevMonth} aria-label="Previous month">‹</button>
         <h2 className="cal-title">{MONTHS[viewMonth]} {viewYear}</h2>
-        <button className="cal-nav" onClick={nextMonth}>›</button>
+        <button className="cal-nav" onClick={nextMonth} aria-label="Next month">›</button>
       </div>
       {error && (
         <div className="cal-error" role="alert">

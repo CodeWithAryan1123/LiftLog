@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Google Fonts loaded via <link> in index.html for non-blocking rendering */
 
 :root {
   /* Core palette */
@@ -80,11 +80,20 @@
 body {
   min-height: 100vh;
   background: var(--bg-base);
-  /* Subtle radial gradient for depth */
-  background-image:
+  /* Subtle radial gradient for depth — using pseudo-element instead of
+     background-attachment: fixed to avoid costly compositing on mobile */
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(77, 208, 225, 0.03), transparent),
     radial-gradient(ellipse 60% 40% at 80% 100%, rgba(199, 146, 234, 0.02), transparent);
-  background-attachment: fixed;
+  pointer-events: none;
 }
 
 /* Reset inputs */
