@@ -11,7 +11,7 @@ import './App.css';
 const LoginPage = lazy(() => import('./components/LoginPage'));
 const WorkoutLogger = lazy(() => import('./components/WorkoutLogger'));
 const PRTracker = lazy(() => import('./components/PRTracker'));
-const CardioTracker = lazy(() => import('./components/CardioTracker'));
+const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
 
 function getTodayStr() {
   const t = new Date();
@@ -153,11 +153,11 @@ function AppContent() {
               Records
             </button>
             <button
-              className={`nav-btn ${activeTab === 'cardio' ? 'nav-active' : ''}`}
-              onClick={() => setActiveTab('cardio')}
+              className={`nav-btn ${activeTab === 'analytics' ? 'nav-active' : ''}`}
+              onClick={() => setActiveTab('analytics')}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/><path d="M3.5 12h4l1.5-3 3 6 1.5-3h4"/></svg>
-              Cardio
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="19" x2="4" y2="5"/><line x1="4" y1="19" x2="20" y2="19"/><polyline points="7 15 10 11 13 13 19 7"/></svg>
+              Analytics
             </button>
           </nav>
           <div className="app-user">
@@ -278,13 +278,13 @@ function AppContent() {
           </Suspense>
         </main>
       ) : (
-        <main className="app-main app-main-single cardio-main">
+        <main className="app-main app-main-single analytics-main">
           <Suspense fallback={
             <div className="app-loading">
               <div className="app-loading-spinner small" />
             </div>
           }>
-            <CardioTracker refreshKey={refreshKey} />
+            <AnalyticsDashboard refreshKey={refreshKey} />
           </Suspense>
         </main>
       )}

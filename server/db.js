@@ -47,36 +47,6 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_workouts_user_id ON workouts(user_id);
     CREATE INDEX IF NOT EXISTS idx_workouts_date    ON workouts(date);
 
-    CREATE TABLE IF NOT EXISTS cardio_sessions (
-      id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      user_id             UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      date                DATE NOT NULL,
-      cardio_type         VARCHAR(100) NOT NULL,
-      duration_minutes    NUMERIC(8, 2) NOT NULL CHECK (duration_minutes > 0),
-      distance_km         NUMERIC(8, 2),
-      calories_burned     INTEGER,
-      average_heart_rate INTEGER,
-      intensity           VARCHAR(20) NOT NULL,
-      notes               TEXT,
-      created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_cardio_sessions_user_date
-      ON cardio_sessions(user_id, date DESC);
-
-    CREATE TABLE IF NOT EXISTS daily_steps (
-      id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      user_id    UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      date       DATE NOT NULL,
-      steps      INTEGER NOT NULL CHECK (steps >= 0),
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      UNIQUE(user_id, date)
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_daily_steps_user_date
-      ON daily_steps(user_id, date DESC);
   `);
 }
 

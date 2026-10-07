@@ -5,8 +5,7 @@ import requestLogger from './middleware/logging.js';
 import { initDb, closeDb } from './db.js';
 import authRoutes from './routes/auth.js';
 import workoutRoutes from './routes/workouts.js';
-import cardioRoutes from './routes/cardio.js';
-import stepsRoutes from './routes/steps.js';
+import analyticsRoutes from './routes/analytics.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -33,8 +32,7 @@ app.use(requestLogger);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
-app.use('/api/cardio', cardioRoutes);
-app.use('/api/steps', stepsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -44,7 +42,7 @@ app.get('/api/health', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('💥 Unhandled error:', err.stack || err);
-  res.status(500).json({ error: err.message, stack: err.stack });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 function shutdown(reason, code = 0) {
@@ -72,6 +70,9 @@ async function start() {
   try {
     if (!process.env.DATABASE_URL) {
       throw new Error('DATABASE_URL environment variable is missing.');
+    }
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is missing.');
     }
     console.log('🔌 Connecting to PostgreSQL...');
     await initDb();

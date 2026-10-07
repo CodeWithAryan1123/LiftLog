@@ -12,8 +12,56 @@ router.param('date', (req, res, next, date) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return res.status(400).json({ error: 'Invalid date format. Expected YYYY-MM-DD.' });
   }
+  const parsed = new Date(`${date}T00:00:00Z`);
+  if (
+    Number.isNaN(parsed.getTime())
+    || parsed.toISOString().slice(0, 10) !== date
+  ) {
+    return res.status(400).json({ error: 'Invalid calendar date.' });
+  }
   next();
 });
+
+function validateExercises(exercises) {
+  if (!Array.isArray(exercises)) return 'Exercises must be an array.';
+
+  for (const entry of exercises) {
+    if (!entry || typeof entry !== 'object' || typeof entry.exercise !== 'string' || !entry.exercise.trim()) {
+      return 'Each exercise must have a name.';
+    }
+    if (!Array.isArray(entry.sets) || entry.sets.length === 0) {
+      return 'Each exercise must have at least one set.';
+    }
+
+    for (const set of entry.sets) {
+      if (!set || typeof set !== 'object') return 'Each set must be an object.';
+      if (!Number.isFinite(Number(set.weight)) || Number(set.weight) < 0) {
+        return 'Set weight must be a non-negative number.';
+      }
+      if (!Number.isFinite(Number(set.reps)) || Number(set.reps) <= 0) {
+        return 'Set reps must be greater than zero.';
+      }
+      if (set.drops !== undefined) {
+        if (!Array.isArray(set.drops) || set.drops.length === 0) {
+          return 'Drop stages must be a non-empty array.';
+        }
+        for (const drop of set.drops) {
+          if (
+            !drop
+            || !Number.isFinite(Number(drop.weight))
+            || Number(drop.weight) < 0
+            || !Number.isFinite(Number(drop.reps))
+            || Number(drop.reps) <= 0
+          ) {
+            return 'Drop stage weight and reps must be valid positive values.';
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
 
 // GET /api/workouts/dates?month=2026-07
 // Returns array of date strings that have workouts
@@ -125,6 +173,10 @@ router.post('/:date', async (req, res) => {
     let finalExercises;
 
     if (Array.isArray(exercises)) {
+      const validationError = validateExercises(exercises);
+      if (validationError) {
+        return res.status(400).json({ error: validationError });
+      }
       // Full replacement of the exercises array
       if (exercises.length === 0) {
         // Delete the workout row entirely
@@ -143,6 +195,10 @@ router.post('/:date', async (req, res) => {
       finalExercises = result.rows[0].exercises;
     } else if (exercise) {
       if (Array.isArray(sets) && sets.length > 0) {
+        const validationError = validateExercises([{ exercise, bodyPart, sets }]);
+        if (validationError) {
+          return res.status(400).json({ error: validationError });
+        }
         // Add or update a single exercise within the workout
         // First, try to get existing workout
         const existing = await query(

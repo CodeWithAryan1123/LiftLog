@@ -2,8 +2,7 @@ import { API_BASE } from './api';
 import { getToken } from '../context/AuthContext';
 
 const WORKOUT_API = `${API_BASE}/api/workouts`;
-const CARDIO_API = `${API_BASE}/api/cardio`;
-const STEPS_API = `${API_BASE}/api/steps`;
+const ANALYTICS_API = `${API_BASE}/api/analytics`;
 
 function headers() {
   const h = { 'Content-Type': 'application/json' };
@@ -127,37 +126,6 @@ export async function getAllPRs() {
   return fetchJson(`${WORKOUT_API}/prs`);
 }
 
-export async function getCardioSessions(range = 'week') {
-  return fetchJson(`${CARDIO_API}?range=${encodeURIComponent(range)}`);
-}
-
-export async function saveCardioSession(session) {
-  return fetchJson(CARDIO_API, {
-    method: 'POST',
-    body: JSON.stringify(session),
-  });
-}
-
-export async function updateCardioSession(id, session) {
-  return fetchJson(`${CARDIO_API}/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(session),
-  });
-}
-
-export async function deleteCardioSession(id) {
-  return fetchJson(`${CARDIO_API}/${id}`, {
-    method: 'DELETE',
-  });
-}
-
-export async function getStepsForDate(date) {
-  return fetchJson(`${STEPS_API}/${date}`);
-}
-
-export async function saveStepsForDate(date, steps) {
-  return fetchJson(`${STEPS_API}/${date}`, {
-    method: 'PUT',
-    body: JSON.stringify({ steps }),
-  });
+export async function getWorkoutAnalytics(range = 'month') {
+  return fetchJson(`${ANALYTICS_API}?range=${encodeURIComponent(range)}`);
 }
