@@ -5,6 +5,8 @@ import requestLogger from './middleware/logging.js';
 import { initDb, closeDb } from './db.js';
 import authRoutes from './routes/auth.js';
 import workoutRoutes from './routes/workouts.js';
+import cardioRoutes from './routes/cardio.js';
+import stepsRoutes from './routes/steps.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +33,8 @@ app.use(requestLogger);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
+app.use('/api/cardio', cardioRoutes);
+app.use('/api/steps', stepsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -11,6 +11,7 @@ import './App.css';
 const LoginPage = lazy(() => import('./components/LoginPage'));
 const WorkoutLogger = lazy(() => import('./components/WorkoutLogger'));
 const PRTracker = lazy(() => import('./components/PRTracker'));
+const CardioTracker = lazy(() => import('./components/CardioTracker'));
 
 function getTodayStr() {
   const t = new Date();
@@ -151,6 +152,13 @@ function AppContent() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               Records
             </button>
+            <button
+              className={`nav-btn ${activeTab === 'cardio' ? 'nav-active' : ''}`}
+              onClick={() => setActiveTab('cardio')}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/><path d="M3.5 12h4l1.5-3 3 6 1.5-3h4"/></svg>
+              Cardio
+            </button>
           </nav>
           <div className="app-user">
             <span className="app-username">{user.name}</span>
@@ -259,7 +267,7 @@ function AppContent() {
             />
           </section>
         </main>
-      ) : (
+      ) : activeTab === 'prs' ? (
         <main className="app-main app-main-single">
           <Suspense fallback={
             <div className="app-loading">
@@ -267,6 +275,16 @@ function AppContent() {
             </div>
           }>
             <PRTracker refreshKey={refreshKey} />
+          </Suspense>
+        </main>
+      ) : (
+        <main className="app-main app-main-single cardio-main">
+          <Suspense fallback={
+            <div className="app-loading">
+              <div className="app-loading-spinner small" />
+            </div>
+          }>
+            <CardioTracker refreshKey={refreshKey} />
           </Suspense>
         </main>
       )}

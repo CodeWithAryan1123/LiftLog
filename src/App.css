@@ -407,6 +407,37 @@
     margin-top: 1px;
   }
 
+  .app-nav {
+    width: 100%;
+    overflow-x: auto;
+    justify-content: stretch;
+    scrollbar-width: none;
+  }
+
+  .app-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-btn {
+    flex: 1 0 auto;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .app-header-right {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .app-header-right .app-nav {
+    order: 1;
+  }
+
+  .app-header-right .app-user,
+  .app-header-right .logout-btn {
+    order: 2;
+  }
+
   .nav-btn {
     padding: 6px 14px;
     font-size: 0.75rem;
