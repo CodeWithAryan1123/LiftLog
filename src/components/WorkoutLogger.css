@@ -130,12 +130,13 @@
 
 .wl-sets-head {
   display: grid;
-  grid-template-columns: 36px 1fr 1fr 32px;
-  gap: 4px;
+  grid-template-columns: 32px 76px 1fr 1fr 30px;
+  gap: 6px;
+  align-items: center;
   padding: 0 8px 8px;
 }
 
-.wl-sh-set, .wl-sh-val, .wl-sh-act {
+.wl-sh-set, .wl-sh-type, .wl-sh-val, .wl-sh-act {
   font-size: 0.6rem;
   font-weight: 700;
   color: var(--text-dim);
@@ -144,21 +145,37 @@
 }
 
 .wl-row {
-  display: grid;
-  grid-template-columns: 36px 1fr 1fr 32px;
-  gap: 4px;
-  align-items: center;
-  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 8px;
   border-radius: var(--r-sm);
-  transition: background var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease), border var(--dur) var(--ease);
+  gap: 8px;
 }
 
 .wl-row:hover {
   background: var(--bg-elevated);
 }
 
+.wl-row-main-line {
+  display: grid;
+  grid-template-columns: 32px 76px 1fr 1fr 30px;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+}
+
 .wl-row-pr {
   background: var(--warning-soft);
+}
+
+.wl-row-dropset {
+  background: rgba(247, 140, 108, 0.05);
+  border-left: 2px solid #f78c6c;
+}
+
+.wl-row-dropset .wl-row-weight {
+  color: #ff9e7d;
 }
 
 .wl-row-num {
@@ -166,6 +183,49 @@
   font-weight: 600;
   color: var(--text-dim);
   text-align: center;
+}
+
+.wl-row-type-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: var(--r-pill);
+  text-align: center;
+  transition: all var(--dur) var(--ease);
+  cursor: pointer;
+  border: 1px solid transparent;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  letter-spacing: 0.3px;
+}
+
+.wl-row-type-badge.is-normal {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.wl-row-type-badge.is-normal:hover:not(:disabled) {
+  background: rgba(247, 140, 108, 0.15);
+  color: var(--orange);
+  border-color: rgba(247, 140, 108, 0.3);
+}
+
+.wl-row-type-badge.is-drop {
+  background: linear-gradient(135deg, rgba(247, 140, 108, 0.22), rgba(251, 191, 74, 0.2));
+  color: #ff9e7d;
+  border-color: rgba(247, 140, 108, 0.45);
+  box-shadow: 0 0 10px rgba(247, 140, 108, 0.15);
+  font-weight: 800;
+}
+
+.wl-row-type-badge.is-drop:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .wl-row-weight {
@@ -180,6 +240,12 @@
   font-weight: 500;
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
+}
+
+.wl-unit {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--text-dim);
 }
 
 .wl-row-del {
@@ -203,21 +269,313 @@
   color: var(--danger);
 }
 
+/* Drop chain representation inside a set row */
+.wl-drop-chain-container {
+  padding-left: 38px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wl-drop-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.wl-chain-stage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wl-chain-arrow {
+  color: #ff9e7d;
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.wl-chain-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-card);
+  border: 1px solid rgba(247, 140, 108, 0.25);
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  font-size: 0.74rem;
+}
+
+.wl-chain-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #ffaa88;
+  text-transform: uppercase;
+  background: rgba(247, 140, 108, 0.12);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.wl-chain-values {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.wl-chain-values strong {
+  color: #ffaa88;
+}
+
+.wl-chain-item-del {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  margin-left: 2px;
+  padding: 2px;
+  border-radius: 3px;
+  line-height: 1;
+  transition: all var(--dur) var(--ease);
+}
+
+.wl-chain-item-del:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.wl-chain-add-btn {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #ffaa88;
+  background: rgba(247, 140, 108, 0.08);
+  border: 1px dashed rgba(247, 140, 108, 0.35);
+  padding: 4px 8px;
+  border-radius: var(--r-sm);
+  transition: all var(--dur) var(--ease);
+}
+
+.wl-chain-add-btn:hover {
+  background: rgba(247, 140, 108, 0.18);
+  border-color: rgba(247, 140, 108, 0.6);
+  transform: translateY(-1px);
+}
+
+.wl-inline-add-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(247, 140, 108, 0.3);
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  animation: wlFade 0.15s ease;
+}
+
+.wl-inline-add-title {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ffaa88;
+}
+
+.wl-inline-add-inputs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.wl-inline-add-inputs input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.wl-inline-add-inputs input:focus {
+  border-color: #f78c6c;
+}
+
+.wl-inline-btn {
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+}
+
+.wl-inline-save {
+  background: linear-gradient(135deg, #f78c6c, #fbbf4a);
+  color: #1a1d24;
+}
+
+.wl-inline-cancel {
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+}
+
 /* Form */
 .wl-form {
   display: flex;
-  gap: 10px;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid var(--border-subtle);
 }
 
-.wl-field {
+.wl-type-toggle {
+  display: flex;
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  padding: 3px;
+  gap: 4px;
+}
+
+.wl-type-btn {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all var(--dur) var(--ease);
+  background: transparent;
+}
+
+.wl-type-btn:hover:not(.active) {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.wl-type-btn.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.wl-type-btn.wl-type-drop.active {
+  background: linear-gradient(135deg, rgba(247, 140, 108, 0.25), rgba(251, 191, 74, 0.2));
+  color: #ffaa88;
+  border: 1px solid rgba(247, 140, 108, 0.35);
+  box-shadow: 0 0 12px rgba(247, 140, 108, 0.15);
+}
+
+/* Multi-stage Drop Set Builder */
+.wl-drop-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(247, 140, 108, 0.04);
+  border: 1px solid rgba(247, 140, 108, 0.2);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+
+.wl-drop-builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+
+.wl-drop-builder-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ff9e7d;
+}
+
+.wl-drop-builder-sub {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.wl-drop-stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wl-drop-stage-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  position: relative;
+}
+
+.wl-stage-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffaa88;
+  background: rgba(247, 140, 108, 0.14);
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  align-self: center;
+}
+
+.wl-stage-remove {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  align-self: center;
+  margin-left: 2px;
+  transition: all var(--dur) var(--ease);
+}
+
+.wl-stage-remove:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.wl-add-more-drop-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  border: 1px dashed rgba(247, 140, 108, 0.45);
+  background: rgba(247, 140, 108, 0.07);
+  color: #ffaa88;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: all var(--dur) var(--ease);
+  cursor: pointer;
+}
+
+.wl-add-more-drop-btn:hover {
+  background: rgba(247, 140, 108, 0.16);
+  border-color: rgba(247, 140, 108, 0.7);
+  transform: translateY(-1px);
+}
+
+.wl-inputs-row {
+  display: flex;
+  gap: 10px;
+}
+
+.wl-inputs-row .wl-field,
+.wl-drop-stage-row .wl-field {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -248,24 +606,41 @@
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.wl-drop-stage-row .wl-field input:focus {
+  border-color: #f78c6c;
+  box-shadow: 0 0 0 3px rgba(247, 140, 108, 0.2);
+}
+
 .wl-field input::placeholder {
   color: var(--text-dim);
   font-weight: 400;
 }
 
 .wl-submit {
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: var(--r-sm);
   background: var(--accent);
   color: var(--bg-base);
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   white-space: nowrap;
   letter-spacing: 0.2px;
+  transition: all var(--dur) var(--ease);
 }
 
 .wl-submit:hover:not(:disabled) {
   box-shadow: 0 2px 14px rgba(77, 208, 225, 0.25);
+  transform: translateY(-1px);
+}
+
+.wl-submit-drop {
+  background: linear-gradient(135deg, #f78c6c, #fbbf4a);
+  color: #1a1d24;
+  font-weight: 800;
+}
+
+.wl-submit-drop:hover:not(:disabled) {
+  box-shadow: 0 2px 16px rgba(247, 140, 108, 0.4);
   transform: translateY(-1px);
 }
 
@@ -305,22 +680,32 @@
     font-size: 1.05rem;
   }
 
+  .wl-sets-head,
+  .wl-row-main-line {
+    grid-template-columns: 28px 68px 1fr 1fr 28px;
+    gap: 4px;
+  }
+
+  .wl-drop-chain-container {
+    padding-left: 28px;
+  }
+
   .wl-row-del {
-    opacity: 0.5;
-  }
-
-  .wl-form {
-    flex-wrap: wrap;
-  }
-
-  .wl-field {
-    flex: 1 1 40%;
-    min-width: 0;
+    opacity: 0.6;
   }
 
   .wl-submit {
-    flex: 1 1 100%;
     padding: 12px;
+    text-align: center;
+  }
+
+  .wl-drop-stage-row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .wl-stage-badge {
+    width: 100%;
     text-align: center;
   }
 }

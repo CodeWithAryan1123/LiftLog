@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Calendar from './components/Calendar';
 import BodyPartSelector from './components/BodyPartSelector';
 import ExerciseList from './components/ExerciseList';
+import StreakCard from './components/StreakCard';
 import { getWorkoutForDate } from './utils/storage';
 import './App.css';
 
@@ -104,7 +105,23 @@ function AppContent() {
   }
 
   const totalSets = dayWorkouts.reduce((t, e) => t + e.sets.length, 0);
-  const totalReps = dayWorkouts.reduce((t, e) => t + e.sets.reduce((r, s) => r + s.reps, 0), 0);
+  const totalReps = dayWorkouts.reduce(
+    (t, e) =>
+      t +
+      e.sets.reduce(
+        (r, s) =>
+          r +
+          (s.drops && s.drops.length > 0
+            ? s.drops.reduce((dr, d) => dr + Number(d.reps || 0), 0)
+            : Number(s.reps || 0)),
+        0
+      ),
+    0
+  );
+  const totalDropSets = dayWorkouts.reduce(
+    (t, e) => t + e.sets.filter((s) => s.isDropSet).length,
+    0
+  );
 
   return (
     <div className="app">
@@ -157,6 +174,7 @@ function AppContent() {
       {activeTab === 'workout' ? (
         <main className="app-main">
           <aside className="app-sidebar">
+            <StreakCard refreshKey={refreshKey} />
             <Calendar
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
@@ -171,6 +189,12 @@ function AppContent() {
                     <span className="day-stat">{dayWorkouts.length} exercises</span>
                     <span className="day-stat-sep">·</span>
                     <span className="day-stat">{totalSets} sets</span>
+                    {totalDropSets > 0 && (
+                      <>
+                        <span className="day-stat-sep">·</span>
+                        <span className="day-stat day-stat-drop">⚡ {totalDropSets} drop</span>
+                      </>
+                    )}
                     <span className="day-stat-sep">·</span>
                     <span className="day-stat">{totalReps} reps</span>
                   </div>
@@ -194,22 +218,30 @@ function AppContent() {
                 </div>
               ) : (
                 <div className="day-card-list">
-                  {dayWorkouts.map((entry) => (
-                    <button
-                      key={entry.exercise}
-                      className="day-card-item"
-                      onClick={() => handleSelectExercise(entry.exercise, entry.bodyPart)}
-                    >
-                      <div className="dci-left">
-                        <span className="dci-part">{entry.bodyPart}</span>
-                        <span className="dci-name">{entry.exercise}</span>
-                      </div>
-                      <div className="dci-right">
-                        <span className="dci-sets">{entry.sets.length}×</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-                      </div>
-                    </button>
-                  ))}
+                  {dayWorkouts.map((entry) => {
+                    const dropCount = entry.sets.filter((s) => s.isDropSet).length;
+                    return (
+                      <button
+                        key={entry.exercise}
+                        className="day-card-item"
+                        onClick={() => handleSelectExercise(entry.exercise, entry.bodyPart)}
+                      >
+                        <div className="dci-left">
+                          <span className="dci-part">{entry.bodyPart}</span>
+                          <span className="dci-name">{entry.exercise}</span>
+                        </div>
+                        <div className="dci-right">
+                          <span className="dci-sets">{entry.sets.length}×</span>
+                          {dropCount > 0 && (
+                            <span className="dci-drop-tag" title={`${dropCount} drop set${dropCount > 1 ? 's' : ''}`}>
+                              ⚡{dropCount}
+                            </span>
+                          )}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>

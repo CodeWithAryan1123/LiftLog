@@ -13,9 +13,11 @@ export default function ExerciseList({ bodyPart, onSelectExercise, dayWorkouts }
   const list = exercises[bodyPart] || [];
 
   const setCounts = {};
+  const dropCounts = {};
   if (dayWorkouts) {
     dayWorkouts.forEach((entry) => {
       setCounts[entry.exercise] = entry.sets.length;
+      dropCounts[entry.exercise] = entry.sets.filter((s) => s.isDropSet).length;
     });
   }
 
@@ -41,7 +43,10 @@ export default function ExerciseList({ bodyPart, onSelectExercise, dayWorkouts }
               {done && (
                 <div className="el-card-badge">
                   <span className="el-card-check">✓</span>
-                  {setCounts[name]} {setCounts[name] === 1 ? 'set' : 'sets'} logged
+                  <span>
+                    {setCounts[name]} {setCounts[name] === 1 ? 'set' : 'sets'}
+                    {dropCounts[name] > 0 ? ` (${dropCounts[name]} drop)` : ''} logged
+                  </span>
                 </div>
               )}
             </button>

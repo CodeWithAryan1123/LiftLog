@@ -95,9 +95,29 @@ export async function removeSet(date, exerciseName, setIndex) {
   return saveWorkoutForDate(date, nextWorkouts);
 }
 
+// Update a set by index (e.g. toggle isDropSet, or edit values)
+export async function updateSet(date, exerciseName, setIndex, updatedFields) {
+  const current = await getWorkoutForDate(date);
+  const entry = current.find((e) => e.exercise === exerciseName);
+  if (!entry || !entry.sets[setIndex]) return current;
+
+  const sets = entry.sets.map((s, i) =>
+    i === setIndex ? { ...s, ...updatedFields } : s
+  );
+
+  const nextWorkouts = current.map((workout) =>
+    workout.exercise === exerciseName
+      ? { ...workout, sets }
+      : workout
+  );
+
+  return saveWorkoutForDate(date, nextWorkouts);
+}
+
 // Get dates that have workouts (for calendar dots)
 export async function getWorkoutDates(month) {
-  return fetchJson(`${WORKOUT_API}/dates?month=${month}`);
+  const query = month ? `?month=${encodeURIComponent(month)}` : '';
+  return fetchJson(`${WORKOUT_API}/dates${query}`);
 }
 
 // Get all personal records
