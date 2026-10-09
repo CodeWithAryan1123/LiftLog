@@ -172,6 +172,10 @@
   max-width: 640px;
 }
 
+.app-main-single.pr-main {
+  max-width: 1080px;
+}
+
 .app-sidebar {
   display: flex;
   flex-direction: column;

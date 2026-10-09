@@ -80,6 +80,13 @@ export default function WorkoutLogger({
       try {
         const maxWeight = Math.max(...validDrops.map((d) => d.weight));
         const totalReps = validDrops.reduce((sum, d) => sum + d.reps, 0);
+        const bestDrop = validDrops.reduce((best, drop) => (
+          !best
+            || drop.weight > best.weight
+            || (drop.weight === best.weight && drop.reps > best.reps)
+            ? drop
+            : best
+        ), null);
 
         const newSet = {
           weight: maxWeight,
@@ -89,7 +96,9 @@ export default function WorkoutLogger({
         };
 
         const updated = await addSetToExercise(selectedDate, exerciseName, bodyPart, newSet);
-        const isNewPR = !currentPR || newSet.weight > currentPR.weight;
+        const isNewPR = !currentPR
+          || bestDrop.weight > currentPR.weight
+          || (bestDrop.weight === currentPR.weight && bestDrop.reps > currentPR.reps);
 
         // Reset
         setDropStages([

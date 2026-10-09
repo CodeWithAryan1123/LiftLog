@@ -41,6 +41,11 @@ export default function PRTracker({ refreshKey }) {
   });
 
   const bodyParts = Object.keys(grouped).sort();
+  const topRecords = Object.entries(prs)
+    .map(([exercise, data]) => ({ exercise, ...data }))
+    .sort((a, b) => b.weight - a.weight || b.reps - a.reps)
+    .slice(0, 3);
+  const strongestRecord = topRecords[0];
 
   if (loading) {
     return (
@@ -85,32 +90,62 @@ export default function PRTracker({ refreshKey }) {
   }
 
   return (
-    <div className="pr-container">
-      <div className="pr-head">
-        <h3 className="pr-head-title">Personal Records</h3>
-        <span className="pr-head-count">{Object.keys(prs).length} exercises tracked</span>
-      </div>
-      <div className="pr-body">
-        {bodyParts.map((part) => (
-          <div key={part} className="pr-section">
-            <h4 className="pr-section-title">{part}</h4>
-            <div className="pr-section-list">
-              {grouped[part]
-                .sort((a, b) => b.weight - a.weight)
-                .map((pr) => (
-                  <div key={pr.exercise} className="pr-row">
-                    <span className="pr-row-name">{pr.exercise}</span>
-                    <div className="pr-row-stats">
-                      <span className="pr-row-weight">{pr.weight}<small>kg</small></span>
-                      <span className="pr-row-sep">×</span>
-                      <span className="pr-row-reps">{pr.reps}</span>
+    <div className="pr-layout">
+      <div className="pr-container">
+        <div className="pr-head">
+          <h3 className="pr-head-title">Personal Records</h3>
+          <span className="pr-head-count">{Object.keys(prs).length} exercises tracked</span>
+        </div>
+        <div className="pr-body">
+          {bodyParts.map((part) => (
+            <div key={part} className="pr-section">
+              <h4 className="pr-section-title">{part}</h4>
+              <div className="pr-section-list">
+                {grouped[part]
+                  .sort((a, b) => b.weight - a.weight)
+                  .map((pr) => (
+                    <div key={pr.exercise} className="pr-row">
+                      <span className="pr-row-name">{pr.exercise}</span>
+                      <div className="pr-row-stats">
+                        <span className="pr-row-weight">{pr.weight}<small>kg</small></span>
+                        <span className="pr-row-sep">×</span>
+                        <span className="pr-row-reps">{pr.reps}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+
+      <aside className="pr-insights">
+        <div className="pr-insights-icon">✦</div>
+        <p className="pr-insights-eyebrow">Training snapshot</p>
+        <h3 className="pr-insights-title">Keep building momentum</h3>
+        <p className="pr-insights-copy">
+          Every record is proof that your consistency is paying off.
+        </p>
+
+        <div className="pr-insights-stats">
+          <div className="pr-insight-stat">
+            <strong>{Object.keys(prs).length}</strong>
+            <span>records tracked</span>
+          </div>
+          <div className="pr-insight-stat">
+            <strong>{bodyParts.length}</strong>
+            <span>muscle groups</span>
+          </div>
+        </div>
+
+        {strongestRecord && (
+          <div className="pr-highlight">
+            <span className="pr-highlight-label">Heaviest record</span>
+            <strong>{strongestRecord.weight}<small> kg</small> × {strongestRecord.reps}</strong>
+            <span className="pr-highlight-exercise">{strongestRecord.exercise}</span>
+          </div>
+        )}
+      </aside>
     </div>
   );
 }

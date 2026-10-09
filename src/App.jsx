@@ -268,7 +268,7 @@ function AppContent() {
           </section>
         </main>
       ) : activeTab === 'prs' ? (
-        <main className="app-main app-main-single">
+        <main className="app-main app-main-single pr-main">
           <Suspense fallback={
             <div className="app-loading">
               <div className="app-loading-spinner small" />

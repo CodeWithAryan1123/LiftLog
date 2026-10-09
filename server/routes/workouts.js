@@ -101,19 +101,32 @@ router.get('/dates', async (req, res) => {
 // Returns all personal records grouped by exercise
 router.get('/prs', async (req, res) => {
   try {
-    // Unnest exercises JSONB array, then unnest each exercise's sets,
-    // then pick the heaviest set (by weight desc, then reps desc) per exercise name.
+    // Unnest exercises, sets, and drop stages so a drop set contributes the
+    // reps performed at each weight rather than its aggregate set reps.
     const result = await query(
       `WITH exploded AS (
         SELECT
           TO_CHAR(w.date, 'YYYY-MM-DD') AS date,
           ex->>'exercise'  AS exercise,
           ex->>'bodyPart'  AS body_part,
-          (s->>'weight')::numeric AS weight,
-          (s->>'reps')::integer   AS reps
+          (stage->>'weight')::numeric AS weight,
+          (stage->>'reps')::integer   AS reps
         FROM workouts w,
              jsonb_array_elements(w.exercises) AS ex,
-             jsonb_array_elements(ex->'sets')  AS s
+             jsonb_array_elements(ex->'sets') AS s,
+             LATERAL jsonb_array_elements(
+               CASE
+                 WHEN jsonb_typeof(s->'drops') = 'array'
+                   AND jsonb_array_length(s->'drops') > 0
+                 THEN s->'drops'
+                 ELSE jsonb_build_array(
+                   jsonb_build_object(
+                     'weight', s->>'weight',
+                     'reps', s->>'reps'
+                   )
+                 )
+               END
+             ) AS stage
         WHERE w.user_id = $1
       ),
       ranked AS (
