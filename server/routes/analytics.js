@@ -43,7 +43,7 @@ function emptyMetrics() {
   return { sets: 0, reps: 0, volume: 0 };
 }
 
-function getSetStages(set) {
+export function getSetStages(set) {
   const drops = Array.isArray(set.drops) && set.drops.length > 0
     ? set.drops
     : [{ weight: set.weight, reps: set.reps }];
@@ -79,7 +79,7 @@ function getSetEstimated1RM(set) {
   return Math.max(...getSetStages(set).map((stage) => getOneRepMax(stage.weight, stage.reps)), 0);
 }
 
-function calculateMetrics(rows) {
+export function calculateMetrics(rows) {
   const daily = new Map();
   const muscles = new Map();
   const exercises = new Map();

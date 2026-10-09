@@ -47,6 +47,17 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_workouts_user_id ON workouts(user_id);
     CREATE INDEX IF NOT EXISTS idx_workouts_date    ON workouts(date);
 
+    CREATE TABLE IF NOT EXISTS workout_profiles (
+      user_id                  UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      primary_goal             VARCHAR(32),
+      experience_level         VARCHAR(32),
+      preferred_workout_split  VARCHAR(100),
+      training_days_per_week   INTEGER,
+      training_goals           TEXT[] NOT NULL DEFAULT '{}',
+      created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
   `);
 }
 

@@ -6,6 +6,8 @@ import { initDb, closeDb } from './db.js';
 import authRoutes from './routes/auth.js';
 import workoutRoutes from './routes/workouts.js';
 import analyticsRoutes from './routes/analytics.js';
+import aiContextRoutes from './routes/aiContext.js';
+import profileRoutes from './routes/profile.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -33,6 +35,8 @@ app.use(requestLogger);
 app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/ai-context', aiContextRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
